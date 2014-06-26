@@ -10,13 +10,12 @@ namespace PlainTextOffenders
     {
         protected override void ConfigureApplicationContainer(TinyIoCContainer container)
         {
+            base.ConfigureApplicationContainer(container);
+            
             var docStore = new DocumentStore { ConnectionStringName = "RavenDB" };
-            AppDomainAssemblyTypeScanner.LoadAssembliesWithNancyReferences();
-
+   
             docStore.Initialize();
             container.Register<IDocumentStore>(docStore, "DocStore");
-
-            base.ConfigureApplicationContainer(container);
         }
 
         protected override void ApplicationStartup(TinyIoCContainer container, IPipelines pipelines)
@@ -38,12 +37,13 @@ namespace PlainTextOffenders
 
         protected override void RequestStartup(TinyIoCContainer container, IPipelines pipelines, NancyContext context)
         {
+            base.RequestStartup(container, pipelines, context);
+            
             pipelines.AfterRequest.AddItemToEndOfPipeline(nancyContext =>
             {
                 // session disposal
                 using (var session = container.Resolve<IDocumentSession>()) {}
             });
-            base.RequestStartup(container, pipelines, context);
         }
     }
 }
